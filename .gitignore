@@ -1,0 +1,12 @@
+# All vim files
+*~
+*.swp
+*.swo
+# All node modules
+node_modules
+
+# JSON lock file
+package-lock.json
+
+# We don't need these junk files
+.DS_Store
