@@ -14,6 +14,7 @@ const db = require( '../lib/database' );
 const { PropertiesNextRunKey } = require( './constants' );
 const debug = require( 'debug' )( "inc:scheduler" );
 const accounts = require( './accounts' );
+const tg = require( './telegram' );
 
 /**
  * Our main schedule module.
@@ -170,12 +171,15 @@ class Scheduler {
 		this.running = true;
 
 		try {
-			// now
-			const now = new Date();
+			// We are now running
+			tg.sendMessage( "Hydrater started." );
 
 			// Give us a way to break out.
 			// Not sure if we'll ever use it.
 			while( this.running ) {
+				// now
+				const now = new Date();
+
 				// We are going to run every minute
 				// Get the next distance to a minute plus 1 second
 				const nextMinutePlusOneSecond = ( 60000 - +now % 60000 ) + 1000;
