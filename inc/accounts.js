@@ -203,7 +203,7 @@ class Account {
 // Do in a look in cast there is an error on this
 try {
 	// Create accounts for everybody
-	const accounts = map( config.accounts, account=>new Account( account ) );
+	const accounts = map( config.accounts, account=>new Account( account ) ).filter( account=>account.enabled );
 
 	// No accounts?
 	if( isEmpty( accounts ) ) {
