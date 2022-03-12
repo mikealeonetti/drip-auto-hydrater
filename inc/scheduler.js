@@ -217,13 +217,13 @@ class Scheduler {
 				// Alert the user when we're going to run again
 				if( !notifiedAboutNextRun ) {
 					// Send through TG
-					tg.sendMessage( `We are going to run again on ${nextRun}.` )
+					tg.sendMessage( `We are going to run again on ${nextRun}.` );
 					// Dont' keep notifying
 					notifiedAboutNextRun = true;
 				}
 
 				// Is it time?
-				if( now>=nextRun ) { // It's time!
+				if( new Date()>=nextRun ) { // It's time!
 					// Set the next run
 					await this.setNextRun( now );
 

@@ -146,52 +146,57 @@ class Account {
 	 * Execute the next task
 	 */
 	async execute() {
-		// Get the next action index from the database
-		let property = await db.Property.findOne( { 'where' : { 'key' : this.NextActionKey } } );
+		try {
+			// Get the next action index from the database
+			let property = await db.Property.findOne( { 'where' : { 'key' : this.NextActionKey } } );
 
-		// Do we have a last property?
-		let nextActionIndex = parseInt( property?.value )||0;
+			// Do we have a last property?
+			let nextActionIndex = parseInt( property?.value )||0;
 
-		// Did we exceed the index?
-		if( nextActionIndex>=size( this.actions ) )
-			nextActionIndex = 0; // Loop it around
+			// Did we exceed the index?
+			if( nextActionIndex>=size( this.actions ) )
+				nextActionIndex = 0; // Loop it around
 
-		// Get the action
-		const action = this.actions[ nextActionIndex ];
+			// Get the action
+			const action = this.actions[ nextActionIndex ];
 
-		// Get the private key for the account
-		let pk = await fs.promises.readFile( this.privateKeyPath ); 
+			// Get the private key for the account
+			let pk = await fs.promises.readFile( this.privateKeyPath ); 
 
-		// Now decrypt it
-		pk = crypt.decrypt( pk, config.crypt.key );
+			// Now decrypt it
+			pk = crypt.decrypt( pk, config.crypt.key );
 
-		debug( "pk=", pk );
+			debug( "pk=", pk );
 
-		// Parse the action
-		switch( action ) {
-			case "hydrate":
-				await this.executeHydrate( pk );
-				break;
-			case "claim":
-				await this.executeClaim( pk );
-				break;
-			default:
-				log.message.warn( "Unknown action %s for account %s", action, this.key );
-			case "noop":
-				log.message.info( "Executing a NoOp on account %s", this.key );
+			// Parse the action
+			switch( action ) {
+				case "hydrate":
+					await this.executeHydrate( pk );
+					break;
+				case "claim":
+					await this.executeClaim( pk );
+					break;
+				default:
+					log.message.warn( "Unknown action %s for account %s", action, this.key );
+				case "noop":
+					log.message.info( "Executing a NoOp on account %s", this.key );
+			}
+
+			// Increment
+			if( !property )
+				property = db.Property.build( { 'key' : this.NextActionKey } );
+
+			// Set the next
+			property.value = nextActionIndex+1;
+
+			debug( "New property", property );
+			
+			// Save it
+			await property.save();
 		}
-
-		// Increment
-		if( !property )
-			property = db.Property.build( { 'key' : this.NextActionKey } );
-
-		// Set the next
-		property.value = nextActionIndex+1;
-
-		debug( "New property", property );
-		
-		// Save it
-		await property.save();
+		catch( e ) {
+			log.message.error( "Execution failed on account %s.", e );
+		}
 	}
 }
 
