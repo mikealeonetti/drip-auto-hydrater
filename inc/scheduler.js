@@ -170,6 +170,9 @@ class Scheduler {
 		// We are now running
 		this.running = true;
 
+		// Did we notify about the next runtime?
+		let notifiedAboutNextRun = false;
+
 		try {
 			// We are now running
 			tg.sendMessage( "Hydrater started." );
@@ -211,8 +214,16 @@ class Scheduler {
 					nextRun = await this.setNextRun( now );
 				}
 
+				// Alert the user when we're going to run again
+				if( !notifiedAboutNextRun ) {
+					// Send through TG
+					tg.sendMessage( `We are going to run again on ${nextRun}.` )
+					// Dont' keep notifying
+					notifiedAboutNextRun = true;
+				}
+
 				// Is it time?
-				if( new Date()>=nextRun ) { // It's time!
+				if( now>=nextRun ) { // It's time!
 					// Set the next run
 					await this.setNextRun( now );
 
@@ -221,6 +232,9 @@ class Scheduler {
 
 					// Wait for them all
 					await Promise.all( p );
+
+					// Set to notify again
+					notifiedAboutNextRun = false;
 				}
 			}
 		}
