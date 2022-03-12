@@ -14,6 +14,8 @@ const Scheduler = require( './inc/scheduler' );
 const log = require( './lib/logger' );
 const debug = require( 'debug' )( "index" );
 const fs = require( 'fs' );
+const config = require( './lib/config' );
+const db = require( './lib/database' );
 
 // Spit out a quick log
 log.message.info( "Starting..." );
@@ -36,5 +38,23 @@ for( const path of [
 	}
 }
 
-// Run the scheduler
-new Scheduler().run();
+// Now run this
+(async function() {
+	try {
+		// Do this
+		const db = require( './lib/database' );
+
+		// Update
+		await db.start();
+
+		// Run the scheduler
+		new Scheduler().run();
+	}
+	catch( e ) {
+		// Log
+		console.error( e );
+
+		// Exit
+		process.exit( 1 );
+	}
+} )();

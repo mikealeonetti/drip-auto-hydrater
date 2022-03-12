@@ -10,6 +10,10 @@ const setMinutes = require( 'date-fns/setMinutes' );
 const setMilliseconds = require( 'date-fns/setMilliseconds' );
 const setSeconds = require( 'date-fns/setSeconds' );
 const addDays = require( 'date-fns/addDays' );
+const db = require( '../lib/database' );
+const { PropertiesNextRunKey } = require( './constants' );
+const debug = require( 'debug' )( "inc:scheduler" );
+const accounts = require( './accounts' );
 
 /**
  * Our main schedule module.
@@ -54,7 +58,7 @@ class Scheduler {
 	/**
 	 * Convert times string/array
 	 */
-	static parseTimes( times ) {
+	static parseTimes( times, now=new Date() ) {
 		// Nuffin
 		if( isEmpty( times ) )
 			return( times ); // Whoops
@@ -77,7 +81,7 @@ class Scheduler {
 				h = Scheduler.amOrPMHour( h, m[ 3 ] );
 
 				// Grab the minutes
-				const m = 60 * ( h%1 );
+				m = 60 * ( h%1 );
 
 				// Remove the decimal
 				h = Math.floor( h );
@@ -124,10 +128,34 @@ class Scheduler {
 	}
 
 	/**
-	 * Execute an account task
+	 * Set the next run time in the database
 	 */
-	async executeAccount( accountName, details ) {
-		debug( "Executed %s with details", accountName, details );
+	async setNextRun( now=new Date() ) {
+		// Set the next run
+		let times = config.schedule.times;
+
+		// Parse the times array
+		times = Scheduler.parseTimes( times, now );
+
+		// We need at least one run time
+		if( isEmpty( times ) )
+			throw new Error( "There are no specified run times." );
+
+
+		debug( "times=", times );
+
+		// Get the next time to fire
+		const nextRun = Scheduler.getNextTime( times, now );
+
+		// This should not be!
+		if( !nextRun )
+			throw new Error( "There is no next time!" );
+
+		// Save it
+		db.Property.upsert( { 'key' : PropertiesNextRunKey, 'value' : +nextRun } );
+
+		// Return it
+		return( nextRun );
 	}
 
 	/**
@@ -152,54 +180,42 @@ class Scheduler {
 				// Get the next distance to a minute plus 1 second
 				const nextMinutePlusOneSecond = ( 60000 - +now % 60000 ) + 1000;
 
+				debug( "nextMinutePlusOneSecond=", nextMinutePlusOneSecond );
+
 				// Now wait until then
-				await timeout( nextMinutePlusOneSecond );
+				//await timeout( nextMinutePlusOneSecond );
+				await timeout( 1000 );
+
+				debug( "Broke timeout" );
 
 				// Check the next run date
-				let nextRun = config.get( "schedule.nextRun" );
+				//let nextRun = config.schedule.nextRun;
+				
+				// The next time we need to run
+				let nextRun;
+
+				// Get the next run property
+				const property = await db.Property.findOne( { 'where' : { 'key' : PropertiesNextRunKey } } );
+
+				// Convert to a time
+				if( property?.value )
+					nextRun = new Date( parseInt( property.value ) );
+
+				// Do we not have a next run?
+				if( !nextRun ) {
+					// Set it
+					nextRun = await this.setNextRun( now );
+				}
 
 				// Is it time?
-				if( nextRun==null || new Date()>=new Date( nextRun ) ) { // It's time!
+				if( true || new Date()>=nextRun ) { // It's time!
 					// Set the next run
-					let times = config.get( "schedule.times" );
-
-					// Parse the times array
-					times = Scheduler.parseTimes( times );
-
-					// We need at least one run time
-					if( isEmpty( times ) )
-						throw new Error( "There are no specified run times." );
-
-
-					debug( "times=", times );
-
-					// Get the next time to fire
-					nextRun = Scheduler.getNextTime( times, now );
-
-					// This should not be!
-					if( !nextRun )
-						throw new Error( "There is no next time!" );
-
-					// Save it
-					config.put( {
-						'schedule' : { nextRun }
-					} );
-
-					// Run each
-					const accounts = config.get( "accounts" );
-					
-					// No accounts?
-					if( isEmpty( accounts ) ) {
-						// There were no accounts?
-						log.message.warn( "No accounts found to run." );
-						// Go again
-						continue;
-					}
+					await this.setNextRun( now );
 
 					// Execute each
-					for( const accountName in accounts ) {
+					for( const account of accounts ) {
 						// Now execute this task
-						await this.executeAccount( accountName, accounts[ accountName ] );
+						await account.execute();
 					}
 				}
 			}
@@ -213,4 +229,4 @@ class Scheduler {
 
 
 // Export it
-module.exports = Schedules;
+module.exports = Scheduler;
