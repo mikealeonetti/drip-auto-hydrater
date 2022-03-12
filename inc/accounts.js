@@ -62,8 +62,6 @@ class Account {
 
 		// Execute it
 		await this.executeTxn( "hydrate", txn, pk );
-
-		process.exit( 0 );
 	}
 
 	/**
