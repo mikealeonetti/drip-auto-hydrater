@@ -106,10 +106,19 @@ class Account {
 
 		// Get the gas amount
 		const remainingGas = await this.getGas();
-		const usedGas = bsc.utils.fromWei( String( receipt.cumulativeGasUsed ) );
+		let { gasUsed } = receipt;
+		//const usedGas = bsc.utils.fromWei( String( receiptcumulativeGasUsed ) );
+		// Get the gas price
+		let gasPrice = await bsc.eth.getGasPrice();
+
+		// Convert from wei
+		gasPrice = bsc.utils.fromWei( String( gasPrice ) );
+
+		// Set the used
+		gasUsed*= gasPrice;
 
 		// Inform
-		await tg.sendMessage( `${type} succeeded on account '${this.key}'.\n\nCost=${usedGas} BNB\nRemaining gas=${remainingGas} BNB\nTXN Hash=${receipt.transactionHash}` );
+		await tg.sendMessage( `${type} succeeded on account '${this.key}'.\n\nCost=${gasUsed} BNB\nRemaining gas=${remainingGas} BNB\nTXN Hash=${receipt.transactionHash}` );
 
 		// Send itt back
 		return( receipt );
