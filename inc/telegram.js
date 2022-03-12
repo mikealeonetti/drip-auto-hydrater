@@ -63,7 +63,7 @@ that.sendMessage = async function( message ) {
 	if( !bot )
 		return( debug( "No bot. Ending." ) );
 	
-	degug( "Attempting to send message", message );
+	debug( "Attempting to send message", message );
 
 	// Get all chats to message
 	const chats = await db.TelegramChat.findAll();
