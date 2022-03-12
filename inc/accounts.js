@@ -28,7 +28,8 @@ class Account {
 		const {
 			key,
 			actions,
-			id
+			id,
+			enabled
 		} = account;
 
 		// Do we have these?
@@ -43,6 +44,7 @@ class Account {
 		this.key = key;
 		this.actions = actions;
 		this.id = id;
+		this.enabled = enabled==null ? true : enabled;
 
 		// Get the private key path
 		this.privateKeyPath = path.join( config.path.privateKeys, key );
