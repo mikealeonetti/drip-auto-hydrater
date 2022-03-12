@@ -225,7 +225,7 @@ class Scheduler {
 				// Is it time?
 				if( new Date()>=nextRun ) { // It's time!
 					// Set the next run
-					await this.setNextRun( now );
+					await this.setNextRun();
 
 					// Execute them all now
 					const p = accounts.map( account=>account.execute() );

@@ -179,6 +179,7 @@ class Account {
 				default:
 					log.message.warn( "Unknown action %s for account %s", action, this.key );
 				case "noop":
+					tg.sendMessage( `${this.key} executed a NoOp.` );
 					log.message.info( "Executing a NoOp on account %s", this.key );
 			}
 
