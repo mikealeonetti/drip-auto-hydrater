@@ -183,8 +183,8 @@ class Scheduler {
 				debug( "nextMinutePlusOneSecond=", nextMinutePlusOneSecond );
 
 				// Now wait until then
-				//await timeout( nextMinutePlusOneSecond );
-				await timeout( 1000 );
+				await timeout( nextMinutePlusOneSecond );
+				//await timeout( 1000 );
 
 				debug( "Broke timeout" );
 
