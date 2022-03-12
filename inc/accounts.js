@@ -1,4 +1,4 @@
-//jshint esversion:9
+//jshint esversion:11
 //jshint node:true
 
 const config = require( '../lib/config' );
@@ -14,6 +14,7 @@ const crypt = require( './crypt' );
 const path = require( 'path' );
 const faucet = require( './faucet' );
 const bsc = require( './bsc' );
+const tg = require( './telegram' );
 
 /**
  * Accounts class
@@ -60,13 +61,15 @@ class Account {
 		const txn = faucet.methods.roll();
 
 		// Execute it
-		this.executeTxn( txn, pk );
+		await this.executeTxn( "hydrate", txn, pk );
+
+		process.exit( 0 );
 	}
 
 	/**
 	 * Execute the transaction
 	 */
-	async executeTxn( txn, pk ) {
+	async executeTxn( type, txn, pk ) {
 		debug( "txn=", txn );
 
 		// Get the gas
@@ -94,6 +97,36 @@ class Account {
 		debug( "receipt=", receipt );
 
 		// receipt.status==true/false, receipt.transactionHash
+
+		if( !receipt.status ) {
+			log.message.error( "Transaction error", receipt );
+
+			throw new Error( "Transaction error" );
+		}
+
+		// Get the gas amount
+		const remainingGas = await this.getGas();
+		const usedGas = bsc.utils.fromWei( String( receipt.cumulativeGasUsed ) );
+
+		// Inform
+		await tg.sendMessage( `${type} succeeded on account '${this.key}'.\n\nCost=${usedGas} BNB\nRemaining gas=${remainingGas} BNB\nTXN Hash=${receipt.transactionHash}` );
+
+		// Send itt back
+		return( receipt );
+	}
+
+	/**
+	 * Get the amount of gas
+	 */
+	async getGas() {
+		// Get as gas
+		let gas = await bsc.eth.getBalance( this.id );
+
+		// Now convert to actual gas from wei
+		gas = bsc.utils.fromWei( gas );
+
+		// Return it
+		return( gas );
 	}
 
 	/**
@@ -106,7 +139,7 @@ class Account {
 		const txn = faucet.methods.claim();
 
 		// Execute it
-		this.executeTxn( txn, pk );
+		await this.executeTxn( "claim", txn, pk );
 	}
 
 	/**

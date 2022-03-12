@@ -1,4 +1,4 @@
-//jshint esversion:9
+//jshint esversion:11
 //jshint node:true
 
 const config = require( '../lib/config' );
@@ -208,15 +208,15 @@ class Scheduler {
 				}
 
 				// Is it time?
-				if( true || new Date()>=nextRun ) { // It's time!
+				if( new Date()>=nextRun ) { // It's time!
 					// Set the next run
 					await this.setNextRun( now );
 
-					// Execute each
-					for( const account of accounts ) {
-						// Now execute this task
-						await account.execute();
-					}
+					// Execute them all now
+					const p = accounts.map( account=>account.execute() );
+
+					// Wait for them all
+					await Promise.all( p );
 				}
 			}
 		}
