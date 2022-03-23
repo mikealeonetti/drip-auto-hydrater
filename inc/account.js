@@ -356,4 +356,4 @@ module.exports = class Account {
 		return( gas );
 	}
 
-}
+};

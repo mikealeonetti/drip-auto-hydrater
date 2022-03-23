@@ -23,14 +23,15 @@ module.exports = class GardenAccount extends Account {
 	 */
 	async _nextRun( time ) {
 		// We'll need to get the plants and the seeds
-		let plants = await garden.methods.hatcheryPlants( this.id ).call();
+		let [ plants, seeds ] = await Promise.all( [
+									garden.methods.hatcheryPlants( this.id ).call(),
+									garden.methods.getSeedsSinceLastPlant( this.id ).call()
+								] );
 
 		// Must be int
 		plants = parseInt( plants );
 		
 		debug( "plants=", plants );
-
-		let seeds = await garden.methods.getSeedsSinceLastPlant( this.id ).call();
 
 		//  Must be int also
 		seeds = parseInt( seeds );
@@ -91,7 +92,7 @@ module.exports = class GardenAccount extends Account {
 		log.message.info( "Executing a claim on account %s", this.key );
 	
 		// Create a tx
-		const txn = garden.methods.plantSeeds();
+		const txn = garden.methods.claimSeeds();
 
 		// Execute it
 		await this.executeTxn( "claim", txn, pk );
@@ -102,9 +103,12 @@ module.exports = class GardenAccount extends Account {
 	 */
 	async executePlant( pk ) {
 		log.message.info( "Executing a plant on account %s", this.key );
+
+		// Grab the referral for some reason
+		const referral = await garden.methods.referrals( this.id ).call();
 	
 		// Create a tx
-		const txn = garden.methods.plantSeeds();
+		const txn = garden.methods.plantSeeds( referral );
 
 		// Execute it
 		await this.executeTxn( "plant", txn, pk );
