@@ -95,7 +95,7 @@ module.exports = class GardenAccount extends Account {
 		const txn = garden.methods.claimSeeds();
 
 		// Execute it
-		await this.executeTxn( "claim", txn, pk );
+		await this.executeTxn( "claim", txn, pk, garden );
 	}
 
 	/**
@@ -111,7 +111,7 @@ module.exports = class GardenAccount extends Account {
 		const txn = garden.methods.plantSeeds( referral );
 
 		// Execute it
-		await this.executeTxn( "plant", txn, pk );
+		await this.executeTxn( "plant", txn, pk, garden );
 	}
 
 	/**
@@ -140,4 +140,4 @@ module.exports = class GardenAccount extends Account {
 			log.message.error( "Execution failed on account %s.", e );
 		}
 	}
-}
+};

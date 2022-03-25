@@ -27,7 +27,7 @@ module.exports = class FaucetAccount extends Account {
 		const txn = faucet.methods.roll();
 
 		// Execute it
-		await this.executeTxn( "hydrate", txn, pk );
+		await this.executeTxn( "hydrate", txn, pk, faucet );
 	}
 
 	/**
@@ -40,7 +40,7 @@ module.exports = class FaucetAccount extends Account {
 		const txn = faucet.methods.claim();
 
 		// Execute it
-		await this.executeTxn( "claim", txn, pk );
+		await this.executeTxn( "claim", txn, pk, faucet );
 	}
 
 	/**
@@ -69,4 +69,4 @@ module.exports = class FaucetAccount extends Account {
 			log.message.error( "Execution failed on account %s.", e );
 		}
 	}
-}
+};

@@ -72,7 +72,7 @@ module.exports = class Account {
 	/**
 	 * Execute the transaction
 	 */
-	async executeTxn( type, txn, pk ) {
+	async executeTxn( type, txn, pk, module ) {
 		debug( "txn=", txn );
 
 		// Get the gas
@@ -87,7 +87,7 @@ module.exports = class Account {
 
 		// Now do the txn
 		const signedTxn = await bsc.eth.accounts.signTransaction( {
-			'to' : faucet.options.address,
+			'to' : module.options.address,
 			gas,
 			data
 		}, pk );
