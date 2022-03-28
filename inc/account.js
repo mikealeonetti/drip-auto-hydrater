@@ -76,7 +76,10 @@ module.exports = class Account {
 		debug( "txn=", txn );
 
 		// Get the gas
-		const gas = await txn.estimateGas( { 'from' : this.id } );
+		let gas = await txn.estimateGas( { 'from' : this.id } );
+
+		// Allow for more gas expenses
+		gas = gas*2;
 
 		debug( "gas=", gas );
 
