@@ -92,7 +92,7 @@ module.exports = class GardenAccount extends Account {
 		log.message.info( "Executing a claim on account %s", this.key );
 	
 		// Create a tx
-		const txn = garden.methods.claimSeeds();
+		const txn = garden.methods.sellSeeds();
 
 		// Execute it
 		await this.executeTxn( "claim", txn, pk, garden );
