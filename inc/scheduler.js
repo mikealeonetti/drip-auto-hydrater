@@ -54,8 +54,8 @@ class Scheduler {
 				// Get now again
 				now = new Date();
 
-				// Loop each and map
-				const p = accounts.map( async account=>{
+				// Execute in serial
+				for( const account of accounts ) {
 					// Get the next run
 					const nextRun = await account.getNextRun();
 
@@ -79,12 +79,8 @@ class Scheduler {
 						// Set to notify again
 						notifiedAboutNextRun[ account.key ] = false;
 					}
-				} );
-
-				// Wait for them all
-				await Promise.all( p );
-
-			}
+				} // End accounts loop
+			} // While running loop
 		}
 		catch( e ) {
 			// We had a fatal error

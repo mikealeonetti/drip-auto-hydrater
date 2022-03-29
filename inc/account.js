@@ -79,7 +79,7 @@ module.exports = class Account {
 		let gas = await txn.estimateGas( { 'from' : this.id } );
 
 		// Allow for more gas expenses
-		gas = gas*2;
+		gas = gas*1.3;
 
 		debug( "gas=", gas );
 
@@ -94,6 +94,9 @@ module.exports = class Account {
 			gas,
 			data
 		}, pk );
+
+		// About to log it
+		log.message.info( "About to execute [%s] on [%s] with %d gas.", type, this.key, gas );
 
 		debug( "signedTxn=", signedTxn );
 
@@ -304,7 +307,15 @@ module.exports = class Account {
 			await property.save();
 		}
 		catch( e ) {
-			log.message.error( "Execution failed on account %s.", e );
+			log.message.error( "Execution failed on account %s.", this.key, e );
+
+			try {
+				// Report error to TG
+				tg.sendMessage( `Failed to execute on account ${this.key}: ${e.message||e}.` );
+			}
+			catch( e2 ) {
+				log.message.error( "Error [%s] reporting to instagram.", this.key, e2 );
+			}
 		}
 	}
 
