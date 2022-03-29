@@ -79,7 +79,7 @@ module.exports = class Account {
 		let gas = await txn.estimateGas( { 'from' : this.id } );
 
 		// Allow for more gas expenses
-		gas = gas*1.3;
+		gas = Math.round( gas*1.3 );
 
 		debug( "gas=", gas );
 
