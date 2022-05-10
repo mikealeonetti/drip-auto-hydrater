@@ -5,7 +5,12 @@ const config = require( '../lib/config' );
 
 const { isEmpty, map, isArray, size } = require( 'lodash' );
 
+const fs = require( 'fs' );
+const path = require( 'path' );
+
 const log = require( '../lib/logger' );
+
+const debug = require( 'debug' )( "inc:accounts" );
 
 const FaucetAccount = require( '../drivers/faucet' );
 const GardenAccount = require( '../drivers/garden' );
@@ -14,23 +19,23 @@ const GardenAccount = require( '../drivers/garden' );
 try {
 	// Create accounts for everybody
 	const accounts = map( config.accounts, account=>{
-		// The class we use
-		let C;
-
 		// This can be done with an array FYI
+		const driver = path.join( __dirname, "../drivers", account.driver )+".js";
 
-		// Based on the driver
-		switch( account.driver ) {
-			case "faucet":
-				C = FaucetAccount;
-				break;
-			case "garden":
-				C = GardenAccount;
-				break;
-			default:
-				log.message.error( "Account [%s] has unrecognized driver '%s'.", account.key, account.driver );
+		debug( "We have the driver path", driver );
+
+		// Does it exist?
+		try {
+			// Can we access it
+			fs.accessSync( driver );
+		}
+		catch( e ) {
+				log.message.error( "Account [%s] has unrecognized driver '%s' (path: %s).", account.key, account.driver, driver, e );
 				process.exit( 1 );
 		}
+
+		// The drier
+		const C = require( driver );
 
 		return( new C( account ) );
 	} ).filter( account=>account.enabled );
