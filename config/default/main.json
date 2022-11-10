@@ -1,0 +1,37 @@
+{
+	"debug": false,
+	"log": {
+		"logs": {
+			"message": "message.log",
+			"request" : "request.log",
+			"sequelize" : "sequelize.log"
+		},
+		"simpleLogs": [
+			"request"
+		],
+		"exceptionLog": "exception.log",
+		"maxFiles": 4,
+		"maxsize": 1048576,
+		"level": "debug"
+	},
+	"telegram" : {
+		"botToken" : ""
+	},
+	"path": {
+		"privateKeys" : "data/privateKeys",
+		"log": "data/log",
+		"database" : "data/database.sqlite3"
+	},
+	"bsc" : {
+		"ws" : "https://bsc-dataseed1.binance.org:443"
+	},
+	"crypt": {
+		"key" : ""
+	},
+	"sqlite" : {
+		"extra" : {}
+	},
+	"schedule" : {
+		"times" : "8am"
+	}
+}
