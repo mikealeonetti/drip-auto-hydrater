@@ -64,6 +64,8 @@ This script also will ask for your wallet Private Key. It will encrypt it with t
 ### Drivers
 * **faucet** - DRIP faucet. Actions are one of "claim", "hydrate", "noop".
 * **garden** - Animal farm garden. Actions are one of "claim", "plain", "noop".
+* **stampede** - Trunk Stampede. Actions are "roll" and "claim".
+* **furio** - Furio. Actions "compound" and "claim".
 
 ### Further securing your Private Keys
 I use encfs to encrypt my Private Keys directory. It's not 100% secure. But at least it's another level of security.
