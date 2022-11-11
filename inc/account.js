@@ -72,11 +72,11 @@ module.exports = class Account {
 	/**
 	 * Execute the transaction
 	 */
-	async executeTxn( type, txn, pk, module ) {
-		debug( "txn=", txn );
+	async executeTxn( type, txn, pk, module, extras ) {
+		debug( "txn=", txn, "extras=", extras );
 
 		// Get the gas
-		let gas = await txn.estimateGas( { 'from' : this.id } );
+		let gas = await txn.estimateGas( { ...extras, 'from' : this.id } );
 
 		// Allow for more gas expenses
 		gas = Math.round( gas*1.3 );
@@ -86,14 +86,18 @@ module.exports = class Account {
 		// Encode the abi data
 		const data = txn.encodeABI();
 
-		debug( "data=", data );
-
-		// Now do the txn
-		const signedTxn = await bsc.eth.accounts.signTransaction( {
+		// The opts
+		const opts = {
+			...extras,
 			'to' : module.options.address,
 			gas,
 			data
-		}, pk );
+		};
+
+		debug( "data=", data, "opts=", opts );
+
+		// Now do the txn
+		const signedTxn = await bsc.eth.accounts.signTransaction( opts, pk );
 
 		// About to log it
 		log.message.info( "About to execute [%s] on [%s] with %d gas.", type, this.key, gas );

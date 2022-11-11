@@ -4,7 +4,9 @@ const bsc = require( './bsc' );
 
 const BigNumber = require( 'bignumber.js' );
 
-const { addMinutes } = require( 'date-fns/addMinutes' );
+const config = require( '../lib/config' );
+
+const { addMinutes } = require( 'date-fns' );
 
 const { floor } = require( 'lodash' );
 
@@ -62,44 +64,10 @@ const liqABI = [
   },
 ];
 
-const uniswapABI = [ {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amountIn",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amountOutMin",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address[]",
-        "name": "path",
-        "type": "address[]"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "deadline",
-        "type": "uint256"
-      }
-    ],
-    "name": "swapExactTokensForTokensSupportingFeeOnTransferTokens",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-} ];
-
 const PCSRouter = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 const PCSFactory = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73";
 
-module.exports = class Swapper {
+const that = module.exports = class Swapper {
   constructor(
 								tokenSymbol,
 								tokenAddress,
@@ -110,7 +78,7 @@ module.exports = class Swapper {
 								collateralWeiUnit,
 								collateralDecimals
 							) {
-		this.routerContract = new bsc.eth.Contract( uniswapABI, PCSRouter );
+		this.routerContract = new bsc.eth.Contract( config.UNISWAP_V2_ROUTER_ABI, PCSRouter );
 		this.tokenWeiUnit = tokenWeiUnit;
 		this.tokenSymbol = tokenSymbol;
 		this.tokenAddress = tokenAddress;
@@ -119,6 +87,8 @@ module.exports = class Swapper {
 		this.collateralSymbol = collateralSymbol;
 		this.collateralAddress = collateralAddress;
 		this.collateralDecimals = collateralDecimals;
+
+		debug( "this=", this );
 
     this.tokenToken = new Token(0, tokenAddress, tokenDecimals, tokenSymbol, tokenSymbol);
 
@@ -141,45 +111,65 @@ module.exports = class Swapper {
 	}
 
 	/**
+	 * Sell the gas
+	 */
+	async sellGas( minimumReceivedCollateral, address ) {
+		minimumReceivedCollateral = Web3.utils.toWei( String( minimumReceivedCollateral ), this.collateralWeiUnit );
+		//sellGas = Web3.utils.toWei( String( sellGas ), this.tokenWeiUnit );
+
+		debug( "minimumReceivedCollateral=", minimumReceivedCollateral, "address=", address );
+
+		// Add
+		const txn = this.routerContract.methods.swapExactETHForTokensSupportingFeeOnTransferTokens(
+			minimumReceivedCollateral,
+			[ this.tokenAddress, this.collateralAddress ],
+			address,
+			Swapper.getDeadlineTime()
+		);
+
+		return( txn );
+	}
+
+	/**
 	 * Swap it
 	 */
 	async sellToken( sellToken, minimumReceivedCollateral, address ) {
-		minimumReceivedCollateral = this.web3.utils.toWei( String( minimumReceivedCollateral ), this.collateralWeiUnit );
-		sellToken = this.web3.utils.toWei( String( sellToken ), this.tokenWeiUnit );
+		minimumReceivedCollateral = Web3.utils.toWei( String( minimumReceivedCollateral ), this.collateralWeiUnit );
+		sellToken = Web3.utils.toWei( String( sellToken ), this.tokenWeiUnit );
 
-		debug( "sellToken=", sellToken, "minimumReceivedCollateral=", minimumReceivedCollateral );
+		debug( "sellToken=", sellToken, "minimumReceivedCollateral=", minimumReceivedCollateral, "address=", address );
 
 		// Add
-		const r = await this.sendRaw( "swapExactTokensForTokensSupportingFeeOnTransferTokens", { 'callArgs' : [
+		const txn = this.routerContract.methods.swapExactTokensForTokensSupportingFeeOnTransferTokens(
 			sellToken,
 			minimumReceivedCollateral,
 			[ this.tokenAddress, this.collateralAddress ],
 			address,
 			Swapper.getDeadlineTime()
-		] } );
+		);
 
-		return( r );
+		return( txn );
 	}
 
 	/**
 	 * Swap it
 	 */
 	async buyToken( sellCollateral, minimumReceivedToken, address ) {
-		sellCollateral = this.web3.utils.toWei( String( sellCollateral ), this.collateralWeiUnit );
-		minimumReceivedToken = this.web3.utils.toWei( String( minimumReceivedToken ), this.tokenWeiUnit );
+		sellCollateral = Web3.utils.toWei( String( sellCollateral ), this.collateralWeiUnit );
+		minimumReceivedToken = Web3.utils.toWei( String( minimumReceivedToken ), this.tokenWeiUnit );
 
 		debug( "sellCollateral=", sellCollateral, "minimumReceivedToken=", minimumReceivedToken );
 
 		// Add
-		const r = await this.sendRaw( "swapExactTokensForTokensSupportingFeeOnTransferTokens", { 'callArgs' : [
+		const txn = this.routerContract.methods.swapExactTokensForTokensSupportingFeeOnTransferTokens(
 			sellCollateral,
 			minimumReceivedToken,
 			[ this.collateralAddress, this.tokenAddress ],
 			address,
 			Swapper.getDeadlineTime()
-		] } );
+		);
 
-		return( r );
+		return( txn );
 	}
 
   async getPair() {
@@ -246,4 +236,8 @@ module.exports = class Swapper {
 
     return price;
   }
-}
+};
+
+
+that.PCSRouter = PCSRouter;
+that.PCSFactory = PCSFactory;
