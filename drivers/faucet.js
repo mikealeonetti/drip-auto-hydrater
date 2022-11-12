@@ -116,7 +116,7 @@ module.exports = class FaucetAccount extends Account {
 
 			log.message.info( "DRIP evaluated DEX=%s, PCS=%s.", dexSellPriceInUSDC, pcsSellPriceInBUSD, this.key );
 
-			if( false && pcsSellPriceInBUSD.gt( dexSellPriceInUSDC ) ) {
+			if( pcsSellPriceInBUSD.gt( dexSellPriceInUSDC ) ) {
 				log.message.info( "PCS price is better. Will sell on PCS.", this.key );
 
 				// Check the allowance
