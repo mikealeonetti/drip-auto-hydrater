@@ -5,6 +5,8 @@ const config = require( '../lib/config' );
 
 const { toLower, first, isEmpty, map, isArray, size } = require( 'lodash' );
 
+const BigNumber = require( 'bignumber.js' );
+
 const setHours = require( 'date-fns/setHours' );
 const setMinutes = require( 'date-fns/setMinutes' );
 const setMilliseconds = require( 'date-fns/setMilliseconds' );
@@ -20,6 +22,7 @@ const path = require( 'path' );
 const faucet = require( './faucet' );
 const bsc = require( './bsc' );
 const tg = require( './telegram' );
+const Web3 = require("web3");
 
 /**
  * Accounts class
@@ -67,6 +70,27 @@ module.exports = class Account {
 		// Shorthand and save our key
 		this.NextActionKey = PropertiesNextActionKey+key;
 		this.PropertiesNextRunKey = PropertiesNextRunKey+key;
+	}
+
+	/**
+	 * Get the gas balance in BigNumber
+	 */
+	async getGasBalance() {
+				// Get the gas balance
+				let gasBalance = await bsc.eth.getBalance( this.id );
+
+				// Unwei it
+				gasBalance = Web3.utils.fromWei( gasBalance );
+
+				debug( "gasBalance 1=%s", gasBalance );
+
+				gasBalance = BigNumber( gasBalance );;
+
+				// To BigNumber
+				debug( "gasBalance 2=%s", gasBalance );
+
+				// Return it
+				return( gasBalance );
 	}
 
 	/**

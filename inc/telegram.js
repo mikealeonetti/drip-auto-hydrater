@@ -59,6 +59,8 @@ else
  * Send a message
  */
 that.sendMessage = async function( message ) {
+	debug( "Looking to send message", message );
+
 	// We don't have a bot, don't send a message
 	if( !bot )
 		return( debug( "No bot. Ending." ) );

@@ -49,6 +49,13 @@ module.exports = class FaucetAccount extends Account {
 	 * Execute a hydrate
 	 */
 	async executeHydrate( pk ) {
+		// Check to see if we have enough gas
+		if( await this.shouldExecuteClaimForGas( pk ) ) {
+			debug( "Will not execute claim 'cause has been claimed for gas." );
+			// Don't double process
+			return;
+		}
+
 		log.message.info( "Executing a hydrate on account %s", this.key );
 	
 		// Create a tx
@@ -59,9 +66,42 @@ module.exports = class FaucetAccount extends Account {
 	}
 
 	/**
+	 * Should execute claim sell
+	 */
+	async shouldExecuteClaimForGas( pk ) {
+		// Get how much gas there is
+		const gasBalance = await this.getGasBalance();
+
+		// Is there enough?
+		if( gasBalance.gt( 0.1 ) ) {
+			log.message.info( "We have enough gas so we don't have to sell %s", this.key );
+
+			return( false ); // We have enough. Don't process.
+		}
+
+		await tg.sendMessage( `${this.key} triggering sell for gas because gas is only ${gasBalance}.` );
+
+		// We don't have enough gas
+		log.message.info( "We don't have enough gas so we have to sell %s", this.key );
+		
+		// Execute a claim and sell
+		await this.executeClaim( pk, true, true, true );
+
+		// We did process
+		return( true );
+	}
+
+	/**
 	 * Execute a claim
 	 */
-	async executeClaim( pk, sellAfter, forceDexSell ) {
+	async executeClaim( pk, sellAfter, forceDexSell, noCheckForLowGas ) {
+		// Check to see if we have enough gas
+		if( !noCheckForLowGas && await this.shouldExecuteClaimForGas( pk ) ) {
+			debug( "Will not execute claim 'cause has been claimed for gas." );
+			// Don't double process
+			return;
+		}
+
 		log.message.info( "Executing a claim on account %s", this.key );
 	
 		// Create a tx
@@ -72,7 +112,7 @@ module.exports = class FaucetAccount extends Account {
 
 		// Do we want to sell after?
 		if( sellAfter ) {
-			// TODO determine if best to do on the internal dex or PCS
+			// Determine it
 			log.message.info( "Sell after wanted. Attempting to execute sell.", this.key );
 
 			// Get the DRIP balance
@@ -116,7 +156,8 @@ module.exports = class FaucetAccount extends Account {
 
 			log.message.info( "DRIP evaluated DEX=%s, PCS=%s.", dexSellPriceInUSDC, pcsSellPriceInBUSD, this.key );
 
-			if( pcsSellPriceInBUSD.gt( dexSellPriceInUSDC ) ) {
+			// Choose which DEX to sell on
+			if( !forceDexSell && pcsSellPriceInBUSD.gt( dexSellPriceInUSDC ) ) {
 				log.message.info( "PCS price is better. Will sell on PCS.", this.key );
 
 				// Check the allowance
@@ -184,15 +225,8 @@ module.exports = class FaucetAccount extends Account {
 				// Send a message to TG
 				await tg.sendMessage( `${this.key} sold ${dripBalance} DRIP to BNB via the DEX.` );
 
-				// Get the gas balance
-				let gasBalance = await bsc.eth.getBalance( this.id );
-
-				// Unwei it
-				gasBalance = Web3.utils.fromWei( gasBalance );
-
-				debug( "gasBalance 1=%s", gasBalance );
-
-				gasBalance = BigNumber( gasBalance );;
+				// Get how much gas there is
+				const gasBalance = await this.getGasBalance();
 
 				// To BigNumber
 				debug( "gasBalance 2=%s", gasBalance );
