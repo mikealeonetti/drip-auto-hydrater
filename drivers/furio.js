@@ -16,6 +16,20 @@ const Account = require( '../inc/account' );
  * Our driver class subclasses the main account class
  */
 module.exports = class FurioAccount extends Account {
+
+	/**
+	 * Execute a claim to furpool
+	 */
+	async executeClaimToFurpool( pk ) {
+		log.message.info( "Executing a claimToFurpool on account %s", this.key );
+	
+		// Create a tx with the minimum 30 day duration
+		const txn = furio.methods.claimToFurpool( 1 );
+
+		// Execute it
+		await this.executeTxn( "claimToFurpool", txn, pk, furio );
+	}
+
 	/**
 	 * Execute a ckaun
 	 */
@@ -56,6 +70,9 @@ module.exports = class FurioAccount extends Account {
 					break;
 				case "claim":
 					await this.executeClaim( pk );
+					break;
+				case "claimToFurpool":
+					await this.executeClaimToFurpool( pk );
 					break;
 				default:
 					log.message.warn( "Unknown Furio action %s for account %s", action, this.key );
