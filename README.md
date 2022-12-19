@@ -4,6 +4,9 @@ This script is meant to be a automated way to trigger some automatic actions to 
 It currently supports
 - The DRIP Faucet
 - The DRIP Farm
+- Furio
+- ArkFi
+- Trunk/Stampede
 
 ## Script set up
 You'll need to create a **config/local.json** file for this to work. Here is a sample one:
@@ -64,11 +67,12 @@ This script also will ask for your wallet Private Key. It will encrypt it with t
 ### Drivers
 * **faucet** - DRIP faucet. Actions are one of "claim", "hydrate", "noop".
 * **garden** - Animal farm garden. Actions are one of "claim", "plain", "noop".
-* **stampede** - Trunk Stampede. Actions are "roll" and "claim".
-* **furio** - Furio. Actions "compound" and "claim".
+* **stampede** - Trunk Stampede. Actions are "roll" and "claim", and "noop".
+* **furio** - Furio. Actions "compound" and "claim", and "noop".
+* **arkfi** - Arkfi.io. The actions are given in compound/withdraw/airdrop values. For example, "60/40/0" or even just "60/40". This will result in 60% compound, 40% withdraw, 0% airdrop. If your percents don't total 100% it'll fail. If you write anything other than any format split of "x/y/z" or "x/y" it'll perform a noop. So "noop" works, too. Technically, you can write "100" for a 100% compound schedule, but you have to own an NFT or something for that. Check out the rules for what you are allowed to do.
 
 ### Further securing your Private Keys
-I use encfs to encrypt my Private Keys directory. It's not 100% secure. But at least it's another level of security.
+I use encfs to encrypt my Private Keys directory. It's not 100% secure. But at least it's another level of security (see https://xkcd.com/538/).
 
 # TODOs
 * Make the drivers more hot pluggable.
