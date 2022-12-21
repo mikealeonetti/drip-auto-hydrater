@@ -8,9 +8,24 @@ const db = require( '../lib/database' );
 const debug = require( 'debug' )( "drivers:arkfi" );
 const arkfi = require( '../inc/arkfi' );
 const tg = require( '../inc/telegram' );
+const DEX = require( '../inc/dex' );
+const arkfiToken = require( '../inc/arkfiToken' );
+const BigNumber = require( 'bignumber.js' );
+const arkfiSwap = require( '../inc/arkfiSwap' );
 
-
+const Web3 = require("web3");
 const Account = require( '../inc/account' );
+
+const arkfiToBUSDSwap = new DEX(
+														"ARKFI",
+														config.ARKFI_TOKEN_ADDR,
+														config.ARKFI_TOKEN_WEIUNIT,
+														config.ARKFI_TOKEN_DECIMALS,
+														"BUSD",
+														config.BUSD_ADDRESS,
+														config.BUSD_WEIUNIT,
+														config.BUSD_DECIMALS
+													);
 
 /**
  * Our driver class subclasses the main account class
@@ -19,7 +34,7 @@ module.exports = class ArkFiAccount extends Account {
 	/**
 	 * Execute a ckaun
 	 */
-	async takeAction( split, pk ) {
+	async takeAction( split, sell, pk ) {
 		log.message.info( "Taking an arkfi action %s", this.key );
 
 		// Make sure each action is AT LEAST 0
@@ -49,6 +64,72 @@ module.exports = class ArkFiAccount extends Account {
 
 		// Execute it
 		await this.executeTxn( "takeAction", txn, pk, arkfi );
+
+		// Should we sell?
+		if( sell ) {
+			debug( "Going to sell." );
+
+			log.message.info( "Going to sell on PCS.", this.key );
+
+			// Check the allowance
+			let allowance = await arkfiToken.methods.allowance( this.id, config.ARKFI_SWAP_CONTRACT_ADDRESS ).call();
+
+			debug( "allowance=", allowance );
+
+			// Unwei
+			allowance = Web3.utils.fromWei( allowance, arkfiToken.weiUnit );
+
+			// Big number
+			allowance = BigNumber( allowance );
+
+			debug( "allowance=%s", allowance );
+
+			// Get the balance
+			const arkfiBalance = await this.getArkfiBalance();
+
+			// Do we have enough
+			if( allowance.lt( arkfiBalance ) ) {
+				log.message.info( "Allowance is only %s. Will get permissions for allowance.", allowance, this.key );
+
+				// Do a mega allowance
+				const allowanceTxn = arkfiToken.methods.approve( config.ARKFI_SWAP_CONTRACT_ADDRESS, Web3.utils.toTwosComplement('-1') );
+
+				// Now do the txn
+				await this.executeTxn( "approveArkfi", allowanceTxn, pk, arkfiToken );
+			}
+
+			// Unwei
+			const arkfiBalanceWei = Web3.utils.toWei( arkfiBalance.toFixed( config.ARKFI_TOKEN_DECIMALS, 1 ), arkfiToken.weiUnit );
+
+			debug( "arkfiBalanceWei=", arkfiBalanceWei );
+
+			tg.sendMessage( `${this.key} selling ${arkfiBalance} arkfi to BUSD.` );
+
+			// Sell it and get what we get
+			const sellTxn = await arkfiSwap.methods.sellForBUSD( arkfiBalanceWei, "1" );
+
+			// Swap it
+			await this.executeTxn( "swapArkfi", sellTxn, pk, arkfiSwap );
+		}
+	}
+
+	/**
+	 * Get the drip balance as a big number
+	 */
+	async getArkfiBalance() {
+			// Get our DRIP balance
+			let arkfiBalance = await arkfiToken.methods.balanceOf( this.id ).call();
+
+			// Bring it down from wei
+			arkfiBalance = Web3.utils.fromWei( arkfiBalance, arkfiToken.weiUnit );
+
+			debug( "arkfiBalance=", arkfiBalance );
+
+			// Now to a big number
+			arkfiBalance = BigNumber( arkfiBalance );
+
+			// Returners
+			return( arkfiBalance );
 	}
 
 	/**
@@ -58,10 +139,18 @@ module.exports = class ArkFiAccount extends Account {
 		debug( "Action='%s'", action );
 
 		try {
+			// Get the matches
+			const matches = action.match( /^(\d+)(\/(\d+)(\/(\d+))?)?(\+sell)?$/ );
+
+			debug( "matches=", matches );
+
 			// Test the action
-			if( /^[\/0-9]+$/.test( action ) ) {
+			if( matches ) {
+				// Break out
+				const [ , c, , w, , a, sell ] = matches;
+
 				// Execute it
-				await this.takeAction( action.split( "/" ), pk );
+				await this.takeAction( [ c, w, a ], Boolean( sell ), pk );
 			}
 			else {
 					// Don't know this action so likely a noop

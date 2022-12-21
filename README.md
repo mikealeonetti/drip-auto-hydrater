@@ -69,7 +69,7 @@ This script also will ask for your wallet Private Key. It will encrypt it with t
 * **garden** - Animal farm garden. Actions are one of "claim", "plain", "noop".
 * **stampede** - Trunk Stampede. Actions are "roll" and "claim", and "noop".
 * **furio** - Furio. Actions "compound" and "claim", and "noop".
-* **arkfi** - Arkfi.io. The actions are given in compound/withdraw/airdrop values. For example, "60/40/0" or even just "60/40". This will result in 60% compound, 40% withdraw, 0% airdrop. If your percents don't total 100% it'll fail. If you write anything other than any format split of "x/y/z" or "x/y" it'll perform a noop. So "noop" works, too. Technically, you can write "100" for a 100% compound schedule, but you have to own an NFT or something for that. Check out the rules for what you are allowed to do.
+* **arkfi** - Arkfi.io. The actions are given in compound/withdraw/airdrop values. For example, "60/40/0" or even just "60/40". This will result in 60% compound, 40% withdraw, 0% airdrop. If your percents don't total 100% it'll fail. If you write anything other than any format split of "x/y/z" or "x/y" it'll perform a noop. So "noop" works, too. Technically, you can write "100" for a 100% compound schedule, but you have to own an NFT or something for that. Check out the rules for what you are allowed to do. Also added the ability to sell your arkfi. If you add +sell to the end of your cwa statement like "60/40+sell" it'll execute a sell of all of your ark afterwards.
 
 ### Further securing your Private Keys
 I use encfs to encrypt my Private Keys directory. It's not 100% secure. But at least it's another level of security (see https://xkcd.com/538/).
