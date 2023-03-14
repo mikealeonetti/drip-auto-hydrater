@@ -84,7 +84,7 @@ module.exports = class Account {
 
 				debug( "gasBalance 1=%s", gasBalance );
 
-				gasBalance = BigNumber( gasBalance );;
+				gasBalance = BigNumber( gasBalance );
 
 				// To BigNumber
 				debug( "gasBalance 2=%s", gasBalance );
@@ -97,6 +97,48 @@ module.exports = class Account {
 	 * Execute the transaction
 	 */
 	async executeTxn( type, txn, pk, module, extras ) {
+		// Returnable
+		let r;
+		let myError;
+
+		// Try 3 times to run the transaction
+		for( let i=0; i<3; ++i ) {
+			debug( "loop %d", i );
+			// Clear myError
+			myError = null;
+
+			try {
+				// Attempt an execute
+				r = await this.tryExecuteTxn( type, txn, pk, module, extras );
+			}
+			catch( e ) {
+				// Set the rror
+				myError = e;
+
+				// Throw to TG
+				await tg.sendMessage( `${type} errored on account '${this.key}': ${e}` );
+			}
+
+			// No error?
+			if( myError==null )
+			{
+				debug( "Succeeded the first time. Not doing it again." );
+
+				// Return the return
+				return( r );
+			}
+		}
+
+		await tg.sendMessage( `${type} failed on account '${this.key}' final error: ${myError}` );
+
+		// Throw the error
+		throw myError;
+	}
+
+	/**
+	 * Attempt to execute the transaction
+	 */
+	async tryExecuteTxn( type, txn, pk, module, extras ) {
 		debug( "txn=", txn, "extras=", extras );
 
 		// Get the gas

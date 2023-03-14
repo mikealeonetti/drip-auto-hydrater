@@ -56,7 +56,47 @@ module.exports = class ArkFiAccount extends Account {
 			return;
 		}
 
-		tg.sendMessage( `${this.key} cwa execution ${compound}/${withdraw}/${airdrop}.` );
+		// Get some variables
+		let [
+			availableRewards,
+			ndv,
+			maxPayout,
+			roi,
+			cwr,
+			balance
+		] = await Promise.all( [
+			arkfi.methods.getAvailableReward( this.id ).call(),
+			arkfi.methods.checkNdv( this.id ).call(),
+			arkfi.methods.checkMaxPayout( this.id ).call(),
+			arkfi.methods.checkRoi( this.id ).call(),
+			arkfi.methods.cwr( this.id ).call(),
+			arkfi.methods.principalBalance( this.id ).call(),
+		] );
+
+		// Process all of these
+		availableRewards = BigNumber( availableRewards ).shiftedBy( -18 );
+		ndv = BigNumber( ndv ).shiftedBy( -18 );
+		maxPayout = BigNumber( maxPayout ).shiftedBy( -18 );
+		roi = BigNumber( roi ).shiftedBy( -1 );
+		cwr = BigNumber( cwr ).shiftedBy( -3 );
+		balance = BigNumber( balance ).shiftedBy( -18 );
+
+		debug( "availableRewards=%s, ndv=%s, maxPayout=%s, roi=%s, cwr=%s, balance=%s",
+			availableRewards,
+			ndv,
+			maxPayout,
+			roi,
+			cwr,
+			balance
+		);
+
+		tg.sendMessage( `${this.key} cwa execution ${compound}/${withdraw}/${airdrop}.
+available=${availableRewards}
+ndv=${ndv}
+maxPayout=${maxPayout}
+roi=${roi}%
+cwr=${cwr}
+balance=${balance}` );
 	
 		// Create a tx
 		// withdraw/compound/airdrop
@@ -65,11 +105,16 @@ module.exports = class ArkFiAccount extends Account {
 		// Execute it
 		await this.executeTxn( "takeAction", txn, pk, arkfi );
 
+		// Get the balance
+		const arkfiBalance = await this.getArkfiBalance();
+
+		tg.sendMessage( `${this.key} current arkfi balance=${arkfiBalance}.` );
+
 		// Should we sell?
 		if( sell ) {
 			debug( "Going to sell." );
 
-			log.message.info( "Going to sell on PCS.", this.key );
+			log.message.info( "Going to sell on the ark site.", this.key );
 
 			// Check the allowance
 			let allowance = await arkfiToken.methods.allowance( this.id, config.ARKFI_SWAP_CONTRACT_ADDRESS ).call();
@@ -83,9 +128,6 @@ module.exports = class ArkFiAccount extends Account {
 			allowance = BigNumber( allowance );
 
 			debug( "allowance=%s", allowance );
-
-			// Get the balance
-			const arkfiBalance = await this.getArkfiBalance();
 
 			// Do we have enough
 			if( allowance.lt( arkfiBalance ) ) {

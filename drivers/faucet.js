@@ -49,6 +49,8 @@ module.exports = class FaucetAccount extends Account {
 	 * Execute a hydrate
 	 */
 	async executeHydrate( pk ) {
+		await this.getUserInfo();
+
 		// Check to see if we have enough gas
 		if( await this.shouldExecuteClaimForGas( pk ) ) {
 			debug( "Will not execute claim 'cause has been claimed for gas." );
@@ -92,9 +94,64 @@ module.exports = class FaucetAccount extends Account {
 	}
 
 	/**
+	 * Get the user info
+	 */
+	async getUserInfo() {
+		// Grab this
+		const [
+			userInfo,
+			payoutOf
+		] = await Promise.all( [
+			faucet.methods.users( this.id ).call(),
+			faucet.methods.payoutOf( this.id ).call(),
+		] );
+
+		debug( "userInfo=", userInfo, "payoutOf=", payoutOf );
+
+		const myUserInfo = {};
+
+		// Convert
+		for( const [ name, decimals ] of [
+			[ "deposits", 18 ],
+			[ "payouts", 18 ],
+			[ "direct_bonus", 18 ],
+			[ "match_bonus", 18 ]
+		] ) {
+			// Set it in the new object
+			myUserInfo[ name ] = BigNumber( userInfo[ name ] ).shiftedBy( -decimals );
+		}
+
+		for( const [ name, decimals ] of [
+			[ "payout", 18 ],
+			[ "max_payout", 18 ],
+			[ "net_payout", 18 ],
+			[ "sustainability_fee", 18 ],
+		] ) {
+			// Set it in the new object
+			myUserInfo[ name ] = BigNumber( payoutOf[ name ] ).shiftedBy( -decimals );
+		}
+
+		// The other formats
+		myUserInfo.deposit_time = new Date( userInfo.deposit_time*1000 );
+
+		// Output to TG
+		await tg.sendMessage( `${this.key} DRIP wallet info:
+available=${myUserInfo.payout}
+available_after_tax=${myUserInfo.net_payout}
+deposits=${myUserInfo.deposits}
+payouts=${myUserInfo.payouts}
+max_payout=${myUserInfo.max_payout}
+sustainability_fee=${myUserInfo.sustainability_fee}
+rewards=${myUserInfo.direct_bonus.plus( myUserInfo.match_bonus )}
+last_action=${myUserInfo.deposit_time}` );
+	}
+
+	/**
 	 * Execute a claim
 	 */
 	async executeClaim( pk, sellAfter, forceDexSell, noCheckForLowGas ) {
+		await this.getUserInfo();
+
 		// Check to see if we have enough gas
 		if( !noCheckForLowGas && await this.shouldExecuteClaimForGas( pk ) ) {
 			debug( "Will not execute claim 'cause has been claimed for gas." );
@@ -155,6 +212,7 @@ module.exports = class FaucetAccount extends Account {
 			debug( "pcsSellPriceInBUSD=", pcsSellPriceInBUSD );
 
 			log.message.info( "DRIP evaluated DEX=%s, PCS=%s.", dexSellPriceInUSDC, pcsSellPriceInBUSD, this.key );
+			tg.sendMessage( `${this.key} DRIP evaluated DEX=${dexSellPriceInUSDC}, PCS=${pcsSellPriceInBUSD}.` );
 
 			// Choose which DEX to sell on
 			if( !forceDexSell && pcsSellPriceInBUSD.gt( dexSellPriceInUSDC ) ) {
@@ -216,8 +274,8 @@ module.exports = class FaucetAccount extends Account {
 				// We don't really care about how much drip we're going to get
 				// 'cauase we're selling it no matter what
 				const swapTxn = fountain.methods.tokenToBnbSwapInput(
-					Web3.utils.toWei( dripBalance.toFixed(), dripToken.weiUnit )
-					, String( 1 ) );
+					Web3.utils.toWei( dripBalance.toFixed(), dripToken.weiUnit ),
+					String( 1 ) );
 
 				// Execute transaction
 				await this.executeTxn( "swapDripOnDex", swapTxn, pk, fountain );
