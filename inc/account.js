@@ -7,6 +7,7 @@ const { toLower, first, isEmpty, map, isArray, size } = require( 'lodash' );
 
 const BigNumber = require( 'bignumber.js' );
 
+const { timeout } = require( './util' );
 const setHours = require( 'date-fns/setHours' );
 const setMinutes = require( 'date-fns/setMinutes' );
 const setMilliseconds = require( 'date-fns/setMilliseconds' );
@@ -118,6 +119,10 @@ module.exports = class Account {
 				// Throw to TG
 				await tg.sendMessage( `${type} errored on account '${this.key}': ${e}` );
 			}
+			finally {
+				// Wait 1 second
+				await timeout( 1000 );
+			}
 
 			// No error?
 			if( myError==null )
@@ -144,10 +149,12 @@ module.exports = class Account {
 		// Get the gas
 		let gas = await txn.estimateGas( { ...extras, 'from' : this.id } );
 
+		debug( "gas before=", gas );
+
 		// Allow for more gas expenses
 		gas = Math.round( gas*1.3 );
 
-		debug( "gas=", gas );
+		debug( "gas after=", gas );
 
 		// Encode the abi data
 		const data = txn.encodeABI();
@@ -162,11 +169,11 @@ module.exports = class Account {
 
 		debug( "data=", data, "opts=", opts );
 
-		// Now do the txn
-		const signedTxn = await bsc.eth.accounts.signTransaction( opts, pk );
-
 		// About to log it
 		log.message.info( "About to execute [%s] on [%s] with %d gas.", type, this.key, gas );
+
+		// Now do the txn
+		const signedTxn = await bsc.eth.accounts.signTransaction( opts, pk );
 
 		debug( "signedTxn=", signedTxn );
 
