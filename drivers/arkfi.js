@@ -60,15 +60,15 @@ module.exports = class ArkFiAccount extends Account {
 		let [
 			availableRewards,
 			ndv,
-			maxPayout,
+			//maxPayoutPercent,
 			roi,
 			cwr,
 			balance
 		] = await Promise.all( [
 			arkfi.methods.getAvailableReward( this.id ).call(),
 			arkfi.methods.checkNdv( this.id ).call(),
-			arkfi.methods.checkMaxPayout( this.id ).call(),
-			arkfi.methods.checkRoi( this.id ).call(),
+			//arkfi.methods.checkForMaxPayoutPercent( this.id ).call(),
+			arkfi.methods.roi( this.id ).call(),
 			arkfi.methods.cwr( this.id ).call(),
 			arkfi.methods.principalBalance( this.id ).call(),
 		] );
@@ -76,18 +76,20 @@ module.exports = class ArkFiAccount extends Account {
 		// Process all of these
 		availableRewards = BigNumber( availableRewards ).shiftedBy( -18 );
 		ndv = BigNumber( ndv ).shiftedBy( -18 );
-		maxPayout = BigNumber( maxPayout ).shiftedBy( -18 );
+		//maxPayout = BigNumber( maxPayout ).shiftedBy( -18 );
 		roi = BigNumber( roi ).shiftedBy( -1 );
 		cwr = BigNumber( cwr ).shiftedBy( -3 );
 		balance = BigNumber( balance ).shiftedBy( -18 );
+		const maxPayout = balance.times( 3 );
 
-		debug( "availableRewards=%s, ndv=%s, maxPayout=%s, roi=%s, cwr=%s, balance=%s",
+		debug( "availableRewards=%s, ndv=%s, maxPayout=%s, roi=%s, cwr=%s, balance=%s, maxPayoutPercent=%s",
 			availableRewards,
 			ndv,
 			maxPayout,
 			roi,
 			cwr,
-			balance
+			balance,
+			//maxPayoutPercent
 		);
 
 		tg.sendMessage( `${this.key} cwa execution ${compound}/${withdraw}/${airdrop}.
