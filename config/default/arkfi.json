@@ -1,6 +1,6 @@
 {
 
-	"ARKFI_SWAP_CONTRACT_ADDRESS" : "0x55553531D05394750d60EFab7E93D73a356F5555",
+	"ARKFI_SWAP_CONTRACT_ADDRESS" : "0xE9Aa536D373ADc29D0A40788EB29b706eA101413",
 	"ARKFI_TOKEN_WEIUNIT": "ether",
 	"ARKFI_TOKEN_DECIMALS": 18,
 	"ARKFI_TOKEN_ADDR": "0x111120a4cFacF4C78e0D6729274fD5A5AE2B1111",
@@ -3395,37 +3395,6 @@
 	      {
 		"indexed": false,
 		"internalType": "uint256",
-		"name": "percent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "instantPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "poolPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "treasuryPercent",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "BondTaxSet",
-	    "type": "event"
-	  },
-	  {
-	    "anonymous": false,
-	    "inputs": [
-	      {
-		"indexed": false,
-		"internalType": "uint256",
 		"name": "instantRewards",
 		"type": "uint256"
 	      },
@@ -3443,31 +3412,6 @@
 	      }
 	    ],
 	    "name": "BondTaxesTaken",
-	    "type": "event"
-	  },
-	  {
-	    "anonymous": false,
-	    "inputs": [
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "totalBusdTax",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "liquidityPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "totalPercent",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "BuyTaxesSet",
 	    "type": "event"
 	  },
 	  {
@@ -3590,6 +3534,37 @@
 	      {
 		"indexed": false,
 		"internalType": "uint256",
+		"name": "amountArk",
+		"type": "uint256"
+	      },
+	      {
+		"indexed": false,
+		"internalType": "uint256",
+		"name": "lpTokenReceived",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "LiquidityAddedWithBoth",
+	    "type": "event"
+	  },
+	  {
+	    "anonymous": false,
+	    "inputs": [
+	      {
+		"indexed": false,
+		"internalType": "address",
+		"name": "investor",
+		"type": "address"
+	      },
+	      {
+		"indexed": false,
+		"internalType": "uint256",
+		"name": "amountBusd",
+		"type": "uint256"
+	      },
+	      {
+		"indexed": false,
+		"internalType": "uint256",
 		"name": "lpTokenReceived",
 		"type": "uint256"
 	      }
@@ -3628,19 +3603,6 @@
 	      {
 		"indexed": false,
 		"internalType": "uint256",
-		"name": "amount",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "MaxSellPerDaySet",
-	    "type": "event"
-	  },
-	  {
-	    "anonymous": false,
-	    "inputs": [
-	      {
-		"indexed": false,
-		"internalType": "uint256",
 		"name": "pumpMultiplier",
 		"type": "uint256"
 	      },
@@ -3662,18 +3624,6 @@
 	  },
 	  {
 	    "anonymous": false,
-	    "inputs": [],
-	    "name": "PriceKeeperActivated",
-	    "type": "event"
-	  },
-	  {
-	    "anonymous": false,
-	    "inputs": [],
-	    "name": "PriceKeeperDeactivated",
-	    "type": "event"
-	  },
-	  {
-	    "anonymous": false,
 	    "inputs": [
 	      {
 		"indexed": false,
@@ -3689,49 +3639,6 @@
 	      }
 	    ],
 	    "name": "SellBusdTaxesTaken",
-	    "type": "event"
-	  },
-	  {
-	    "anonymous": false,
-	    "inputs": [
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "busdSellTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "busdSellDumpTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "liquiditySellTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "vaultSellTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "liquiditySellDumpTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"indexed": false,
-		"internalType": "uint256",
-		"name": "vaultSellDumpTaxPercent",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "SellTaxesSet",
 	    "type": "event"
 	  },
 	  {
@@ -3936,6 +3843,24 @@
 	    "inputs": [
 	      {
 		"internalType": "uint256",
+		"name": "amountArk",
+		"type": "uint256"
+	      },
+	      {
+		"internalType": "uint256",
+		"name": "amountBusd",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "addLiquidityWithBoth",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "uint256",
 		"name": "amount",
 		"type": "uint256"
 	      },
@@ -3948,19 +3873,6 @@
 	    "name": "addLiquidityWithBusd",
 	    "outputs": [],
 	    "stateMutability": "nonpayable",
-	    "type": "function"
-	  },
-	  {
-	    "inputs": [],
-	    "name": "autoTargetPrice",
-	    "outputs": [
-	      {
-		"internalType": "bool",
-		"name": "",
-		"type": "bool"
-	      }
-	    ],
-	    "stateMutability": "view",
 	    "type": "function"
 	  },
 	  {
@@ -4031,6 +3943,65 @@
 	  {
 	    "inputs": [
 	      {
+		"internalType": "address",
+		"name": "investor",
+		"type": "address"
+	      },
+	      {
+		"internalType": "uint256",
+		"name": "amountInBusd",
+		"type": "uint256"
+	      },
+	      {
+		"internalType": "address",
+		"name": "referrer",
+		"type": "address"
+	      }
+	    ],
+	    "name": "buyArkForSomeoneNoBusdTax",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "address",
+		"name": "investor",
+		"type": "address"
+	      },
+	      {
+		"internalType": "uint256",
+		"name": "amountInBusd",
+		"type": "uint256"
+	      },
+	      {
+		"internalType": "address",
+		"name": "referrer",
+		"type": "address"
+	      }
+	    ],
+	    "name": "buyArkForSomeoneTotallyTaxFree",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "uint256",
+		"name": "amountInBusd",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "buyArkTaxFreeNoDeposit",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
 		"internalType": "uint256",
 		"name": "minimumArk",
 		"type": "uint256"
@@ -4042,6 +4013,24 @@
 	      }
 	    ],
 	    "name": "buyArkWithBNB",
+	    "outputs": [],
+	    "stateMutability": "payable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "address",
+		"name": "investor",
+		"type": "address"
+	      },
+	      {
+		"internalType": "address",
+		"name": "referrer",
+		"type": "address"
+	      }
+	    ],
+	    "name": "buyArkWithBNBForSomeone",
 	    "outputs": [],
 	    "stateMutability": "payable",
 	    "type": "function"
@@ -4065,6 +4054,29 @@
 	      }
 	    ],
 	    "name": "buyArkWithBUSD",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "address",
+		"name": "investor",
+		"type": "address"
+	      },
+	      {
+		"internalType": "uint256",
+		"name": "amountInBusd",
+		"type": "uint256"
+	      },
+	      {
+		"internalType": "address",
+		"name": "referrer",
+		"type": "address"
+	      }
+	    ],
+	    "name": "buyArkWithBUSDForSomeone",
 	    "outputs": [],
 	    "stateMutability": "nonpayable",
 	    "type": "function"
@@ -4113,6 +4125,19 @@
 	  {
 	    "inputs": [],
 	    "name": "distributeRewards",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "address",
+		"name": "approvalAddress",
+		"type": "address"
+	      }
+	    ],
+	    "name": "doTheApprovals",
 	    "outputs": [],
 	    "stateMutability": "nonpayable",
 	    "type": "function"
@@ -4196,6 +4221,44 @@
 	      }
 	    ],
 	    "name": "expectedBUSDFromARKWithDumpTax",
+	    "outputs": [
+	      {
+		"internalType": "uint256",
+		"name": "",
+		"type": "uint256"
+	      }
+	    ],
+	    "stateMutability": "view",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "uint256",
+		"name": "amountInBusd",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "getArkAmountForBond",
+	    "outputs": [
+	      {
+		"internalType": "uint256",
+		"name": "",
+		"type": "uint256"
+	      }
+	    ],
+	    "stateMutability": "view",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "uint256",
+		"name": "amountInArk",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "getBusdAmountForBond",
 	    "outputs": [
 	      {
 		"internalType": "uint256",
@@ -4323,6 +4386,25 @@
 	    "type": "function"
 	  },
 	  {
+	    "inputs": [
+	      {
+		"internalType": "address",
+		"name": "",
+		"type": "address"
+	      }
+	    ],
+	    "name": "maxSellOfWallet",
+	    "outputs": [
+	      {
+		"internalType": "uint256",
+		"name": "",
+		"type": "uint256"
+	      }
+	    ],
+	    "stateMutability": "view",
+	    "type": "function"
+	  },
+	  {
 	    "inputs": [],
 	    "name": "maxSellPerDay",
 	    "outputs": [
@@ -4437,6 +4519,26 @@
 	    "type": "function"
 	  },
 	  {
+	    "inputs": [],
+	    "name": "rescueBnb",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "uint256",
+		"name": "amountInArk",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "sellArkTaxFree",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
 	    "inputs": [
 	      {
 		"internalType": "uint256",
@@ -4512,52 +4614,6 @@
 	    "inputs": [
 	      {
 		"internalType": "uint256",
-		"name": "percent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "_instantPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "_poolPercent",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "setBondTax",
-	    "outputs": [],
-	    "stateMutability": "nonpayable",
-	    "type": "function"
-	  },
-	  {
-	    "inputs": [
-	      {
-		"internalType": "uint256",
-		"name": "totalBusdTax",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "liquidityPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "totalPercent",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "setBuyTaxes",
-	    "outputs": [],
-	    "stateMutability": "nonpayable",
-	    "type": "function"
-	  },
-	  {
-	    "inputs": [
-	      {
-		"internalType": "uint256",
 		"name": "ceiling",
 		"type": "uint256"
 	      }
@@ -4594,6 +4650,24 @@
 	      }
 	    ],
 	    "name": "setFloorAndCeiling",
+	    "outputs": [],
+	    "stateMutability": "nonpayable",
+	    "type": "function"
+	  },
+	  {
+	    "inputs": [
+	      {
+		"internalType": "address",
+		"name": "investor",
+		"type": "address"
+	      },
+	      {
+		"internalType": "uint256",
+		"name": "amount",
+		"type": "uint256"
+	      }
+	    ],
+	    "name": "setIndividualMaxSellPerDay",
 	    "outputs": [],
 	    "stateMutability": "nonpayable",
 	    "type": "function"
@@ -4643,44 +4717,6 @@
 	      }
 	    ],
 	    "name": "setMaxSellPerDay",
-	    "outputs": [],
-	    "stateMutability": "nonpayable",
-	    "type": "function"
-	  },
-	  {
-	    "inputs": [
-	      {
-		"internalType": "uint256",
-		"name": "busdSellTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "busdSellDumpTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "liquiditySellTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "vaultSellTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "liquiditySellDumpTaxPercent",
-		"type": "uint256"
-	      },
-	      {
-		"internalType": "uint256",
-		"name": "vaultSellDumpTaxPercent",
-		"type": "uint256"
-	      }
-	    ],
-	    "name": "setSellTaxes",
 	    "outputs": [],
 	    "stateMutability": "nonpayable",
 	    "type": "function"
@@ -4753,19 +4789,6 @@
 	      }
 	    ],
 	    "stateMutability": "view",
-	    "type": "function"
-	  },
-	  {
-	    "inputs": [
-	      {
-		"internalType": "bool",
-		"name": "active",
-		"type": "bool"
-	      }
-	    ],
-	    "name": "toggleAutomaticTargetPrice",
-	    "outputs": [],
-	    "stateMutability": "nonpayable",
 	    "type": "function"
 	  },
 	  {
