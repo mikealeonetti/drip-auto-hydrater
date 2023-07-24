@@ -17,6 +17,8 @@ const GardenAccount = require( '../drivers/garden' );
 
 // Do in a look in cast there is an error on this
 try {
+	debug( "config.accounts=", config.accounts );
+
 	// Create accounts for everybody
 	const accounts = map( config.accounts, account=>{
 		// This can be done with an array FYI
@@ -47,6 +49,8 @@ try {
 		// Exit
 		process.exit( 1 );
 	}
+
+	debug( "accounts=", accounts );
 
 	module.exports = accounts;
 }

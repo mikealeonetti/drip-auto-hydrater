@@ -74,8 +74,17 @@ module.exports = class FaucetAccount extends Account {
 		// Get how much gas there is
 		const gasBalance = await this.getGasBalance();
 
+		// Do we have a minimum gas for selling?
+		let { forceSellMinGas } = this.extraConfig;
+
+		// Do we not have it?
+		if( !forceSellMinGas )
+			forceSellMinGas = 0.02; // Force
+
+		debug( "forceSellMinGas=", forceSellMinGas );
+
 		// Is there enough?
-		if( gasBalance.gt( 0.02 ) ) {
+		if( gasBalance.gt( forceSellMinGas ) ) {
 			log.message.info( "We have enough gas so we don't have to sell %s", this.key );
 
 			return( false ); // We have enough. Don't process.

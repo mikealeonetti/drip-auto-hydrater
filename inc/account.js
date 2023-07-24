@@ -39,7 +39,8 @@ module.exports = class Account {
 			actions,
 			id,
 			enabled,
-			keyFile
+			keyFile,
+			...others
 		} = account;
 
 		// Do we have these?
@@ -55,6 +56,9 @@ module.exports = class Account {
 		this.actions = actions;
 		this.id = id;
 		this.enabled = enabled==null ? true : enabled;
+
+		// Save the additional configs
+		this.extraConfig = others;
 
 		// Get the private key path
 		this.privateKeyPath = path.join( config.path.privateKeys, keyFile||key );
@@ -167,6 +171,24 @@ module.exports = class Account {
 			data
 		};
 
+		// Did the user specify a gas amount?
+		const customGas = config.bsc.gasInGwei;
+
+		debug( "customGas=", customGas );
+
+		// The gas price
+		let gasPrice;
+
+		// Check for existence
+		if( customGas )
+		{
+			debug( "User specified custom gas.", customGas );
+
+			// Make sure it's a string.
+			// Y'all should've used ethers.js.
+			gasPrice = opts.gasPrice = bsc.utils.toWei( String( customGas ), "gwei" ); 
+		}
+
 		debug( "data=", data, "opts=", opts );
 
 		// About to log it
@@ -194,14 +216,22 @@ module.exports = class Account {
 		const remainingGas = await this.getGas();
 		let { gasUsed } = receipt;
 		//const usedGas = bsc.utils.fromWei( String( receiptcumulativeGasUsed ) );
-		// Get the gas price
-		let gasPrice = await bsc.eth.getGasPrice();
+
+		// Do we have a gas price?
+		if( gasPrice==null ) {
+			// Get the gas price
+			gasPrice = await bsc.eth.getGasPrice();
+		}
 
 		// Convert from wei
 		gasPrice = bsc.utils.fromWei( String( gasPrice ) );
 
+		debug( "gasPrice=", gasPrice );
+
 		// Set the used
 		gasUsed*= gasPrice;
+
+		debug( "gasUsed=", gasUsed );
 
 		// Inform
 		await tg.sendMessage( `${type} succeeded on account '${this.key}'.\n\nCost=${gasUsed} BNB\nRemaining gas=${remainingGas} BNB\nTXN Hash=${receipt.transactionHash}` );

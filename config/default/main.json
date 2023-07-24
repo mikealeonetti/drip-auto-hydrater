@@ -26,7 +26,8 @@
 		"database" : "data/database.sqlite3"
 	},
 	"bsc" : {
-		"ws" : "https://bsc-dataseed1.binance.org:443"
+		"ws" : "https://bsc-dataseed1.binance.org:443",
+		"gasInGwei" : null
 	},
 	"crypt": {
 		"key" : ""
